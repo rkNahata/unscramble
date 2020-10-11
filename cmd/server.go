@@ -10,18 +10,21 @@ import (
 	"time"
 	"unscramble/api"
 	"unscramble/api/transactions"
-	"unscramble/internal/product"
+	"unscramble/data"
 	intTxn "unscramble/internal/transactions"
 )
 
 const Port = 8080
 
 func main() {
-
-	product.CreateProductDetailsMap()
+	//initialize product details
+	data.CreateProductDetailsMap()
+	//initialize txn details
 	intTxn.CreateTransactionDetailsMapAtStartup()
 	fmt.Println("Starting server")
+	//initialize the server
 	startHttpServer()
+	//start the transactionFiles dir watcher
 	setUpWatcher()
 	shutDownChan := make(chan os.Signal)
 	signal.Notify(shutDownChan, os.Interrupt)
@@ -40,9 +43,8 @@ func startHttpServer() {
 	assignmentGroup.GET("/transactionSummaryByManufacturingCity/:last_n_days", api.CommonHandler(transactions.CityWiseSummaryHandler))
 
 	go func() {
-		fmt.Print("Starting Web server port %d", Port)
+		fmt.Print("Starting Web server port ", Port)
 		if err := router.Run(":" + strconv.Itoa(Port)); err != nil {
-			//log.WithField("error", err).Error("Error in starting server")
 			os.Exit(1)
 		}
 	}()
@@ -59,7 +61,6 @@ func setUpWatcher(){
 		for {
 			select {
 			case event := <-w.Event:
-				fmt.Println(event)
 				intTxn.CreateTransactionDetailsMap(event.FileInfo.Name())
 			case err := <-w.Error:
 				fmt.Println(err)

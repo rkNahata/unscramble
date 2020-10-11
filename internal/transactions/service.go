@@ -68,6 +68,7 @@ func (service) GetSummaryByCity(days int) (*TxnSummaryByCity, error) {
 	return &response, nil
 }
 
+//it takes list of file names, iterate over it and read each file to parse csv data into a struct
 func getTransactionsFromCSV(filePaths []string) []*data.TransactionData {
 	var transactionList []*data.TransactionData
 	var tsf []*data.Transactions
@@ -106,18 +107,18 @@ func getTransactionsFromCSV(filePaths []string) []*data.TransactionData {
 
 var transactionDetails map[int]*data.TransactionData
 
+//this function checks if there exists any txn files in transactionsFiles directory
+//if any txn file is found then txn map is initialized
 func CreateTransactionDetailsMapAtStartup() map[int]*data.TransactionData {
 	var fileList []string
-	wd, _ := os.Getwd()
-	transactiondest := "transactionFiles"
 	var err error
-	filesInfoList, err := ioutil.ReadDir(transactiondest)
+	filesInfoList, err := ioutil.ReadDir(BaseTransaction)
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
 	}
 	for _, f := range filesInfoList {
-		fileList = append(fileList, filepath.Join(wd, transactiondest, f.Name()))
+		fileList = append(fileList, filepath.Join(BaseTransaction, f.Name()))
 	}
 	td := GetTransactionsDetailsMap()
 	txn := getTransactionsFromCSV(fileList)
@@ -128,6 +129,7 @@ func CreateTransactionDetailsMapAtStartup() map[int]*data.TransactionData {
 	return transactionDetails
 }
 
+//return the in memory map if exists else it initializes a new map
 func GetTransactionsDetailsMap() map[int]*data.TransactionData {
 	if transactionDetails != nil {
 		return transactionDetails
@@ -135,6 +137,7 @@ func GetTransactionsDetailsMap() map[int]*data.TransactionData {
 	return make(map[int]*data.TransactionData)
 }
 
+//create a map of [transactionId]TransactionsDetails
 func CreateTransactionDetailsMap(filePath string) map[int]*data.TransactionData {
 	filePaths := []string{path.Join(BaseTransaction, filePath)}
 	td := GetTransactionsDetailsMap()

@@ -40,22 +40,3 @@ func GetProductDetailsMap() map[int]*Product {
 	}
 	return make(map[int]*Product)
 }
-
-var cityWiseProducts map[string][]int
-
-func createCityWiseProductMap(filePath string) map[string][]int {
-	c := make(map[string][]int)
-	products := getProductFromCSV(filePath)
-	for _, p := range products {
-		c[p.ProductManufacturingCity] = append(c[p.ProductManufacturingCity], p.ProductID)
-	}
-	cityWiseProducts = c
-	return cityWiseProducts
-}
-
-func GetCityWiseProductMap(filePath string) map[string][]int {
-	if cityWiseProducts != nil {
-		return cityWiseProducts
-	}
-	return createCityWiseProductMap(filePath)
-}
